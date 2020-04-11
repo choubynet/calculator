@@ -21,7 +21,7 @@ def input_number(value):
     global result_ongoing
 
     # réinitialisation si on rentre un chiffre directement après un "="
-    if last_operation == "=":
+    if last_operation == "=" or last_operation == 'error':
         reset()
     
     # réinitialisation du nombre saisi si la dernière touche saisie était une opération
@@ -43,6 +43,9 @@ def input_operation(value):
     global result_ongoing
     global last_operation
 
+    if last_operation == "error":
+        return
+
     # gestion si l'utilisateur saisit une opération juste après une autre opération
     if last_operation != "" and last_operation != "=":
         last_operation = value
@@ -61,7 +64,11 @@ def input_operation(value):
 
     # affichage du nouveau résultat
     calc_ongoing = calc_ongoing + result_ongoing
-    result_ongoing = calcul(calc_ongoing)
+    try:
+        result_ongoing = calcul(calc_ongoing)
+    except:
+        error()
+        return
     result_text.set(result_ongoing)
 
     # affichage du nouveau calcul en cours
@@ -69,20 +76,24 @@ def input_operation(value):
     calc_input_text.set(calc_ongoing)
 
 # gestion de la saisie du "="
-def equal():
+def input_equal():
     global calc_ongoing
     global result_ongoing    
     global last_operation
 
     # gestion si la dernière opération saisie était "="
-    if last_operation == "=":
+    if last_operation == "=" or last_operation == "error":
         return
 
     last_operation = "="
 
     # affichage du nouveau résultat
     calc_ongoing = calc_ongoing + result_ongoing
-    result_ongoing = calcul(calc_ongoing)
+    try:
+        result_ongoing = calcul(calc_ongoing)
+    except:
+        error()
+        return
     result_text.set(result_ongoing)
 
     # affichage du nouveau calcul en cours
@@ -94,7 +105,7 @@ def calcul(calc):
 
     # transforme les soustractions en additions et les divisions en multiplications
     calc = calc.replace("-", "+-")
-    calc = calc.replace("/", "X/")
+    alc = calc.replace("/", "X/")
 
     # transforme les "," en "." pour les calculs
     calc = calc.replace(",", ".")
@@ -120,7 +131,7 @@ def calcul(calc):
     return result
 
 # gestion du bouton "clear"
-def clear():
+def input_clear():
     global calc_ongoing
     global result_ongoing
     global last_operation
@@ -132,7 +143,7 @@ def clear():
         reset()
 
 # gestion du bouton "back"
-def back():
+def input_back():
     global calc_ongoing
     global result_ongoing
     global last_operation
@@ -146,6 +157,8 @@ def back():
     elif last_operation == "=":
         calc_ongoing = ""
         calc_input_text.set(calc_ongoing)
+    elif last_operation == "error":
+        reset()
 
 # réinitialise la calculatrice
 def reset():
@@ -155,6 +168,17 @@ def reset():
     calc_ongoing = ""
     result_ongoing = "0"
     last_operation = ""
+    calc_input_text.set(calc_ongoing)
+    result_text.set(result_ongoing)
+
+# bloque le programme en cas d'erreur
+def error():
+    global calc_ongoing
+    global result_ongoing
+    global last_operation
+    calc_ongoing = ""
+    result_ongoing = "ERREUR"
+    last_operation = "error"
     calc_input_text.set(calc_ongoing)
     result_text.set(result_ongoing)
 
@@ -185,11 +209,11 @@ Button(window, text=" X ", font=('Helvetica', 12), fg='black', bg='grey', comman
 Button(window, text=" - ", font=('Helvetica', 12), fg='black', bg='grey', command=lambda: input_operation("-"), height=2, width=7).grid(row=7, column=4)
 Button(window, text=" + ", font=('Helvetica', 12), fg='black', bg='grey', command=lambda: input_operation("+"), height=2, width=7).grid(row=8, column=4)
 
-Button(window, text=" <= ", font=('Helvetica', 12), fg='black', bg='grey', command=lambda: back(), height=2, width=7).grid(row=3, column=4)
+Button(window, text=" ln ", font=('Helvetica', 12), fg='black', bg='grey', command=lambda: input_instant_operation("ln"), height=2, width=7).grid(row=9, column=0)
 
-Button(window, text=" C ", font=('Helvetica', 12), fg='black', bg='grey', command=lambda: clear(), height=2, width=7).grid(row=3, column=3)
-
-Button(window, text=" = ", font=('Helvetica', 12), fg='black', bg='blue', command=lambda: equal(), height=2, width=7).grid(row=9, column=4)
+Button(window, text=" <= ", font=('Helvetica', 12), fg='black', bg='grey', command=lambda: input_back(), height=2, width=7).grid(row=3, column=4)
+Button(window, text=" C ", font=('Helvetica', 12), fg='black', bg='grey', command=lambda: input_clear(), height=2, width=7).grid(row=3, column=3)
+Button(window, text=" = ", font=('Helvetica', 12), fg='black', bg='blue', command=lambda: input_equal(), height=2, width=7).grid(row=9, column=4)
 
 # lance le GUI
 window.mainloop()
