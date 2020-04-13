@@ -131,6 +131,10 @@ def input_instant_operation(value):
             result_ongoing = str(log(Decimal(result_ongoing))) 
         elif value == "log":
             result_ongoing = str(log(Decimal(result_ongoing), 10))
+        elif value == "fact":
+            result_ongoing = str(factorial(Decimal(result_ongoing)))
+        elif value == "abs":
+            result_ongoing = str(fabs(Decimal(result_ongoing)))
         result_text.set(result_ongoing)
         last_operation = "instant"
 
@@ -216,16 +220,66 @@ def calcul(calc):
             calc = calc[:search_start] + str(log(Decimal(calcul(calc[(search_start + 4):-(len(calc) - search_end)])), 10))
         else:
             calc = calc[:search_start] + str(log(Decimal(calcul(calc[(search_start + 4):-(len(calc) - search_end)])), 10)) + calc[-(len(calc) - search_end - 1):]
-        search_start = calc.find("log(")    
+        search_start = calc.find("log(")
+
+    search_start = calc.find("fact(")
+    while search_start != -1:
+        bracket_count = 1
+        for i in range(search_start + 5, len(calc)):                        
+            if calc[i] == "(":
+                bracket_count = bracket_count + 1
+            elif calc[i] == ")":
+                bracket_count = bracket_count - 1
+            if bracket_count == 0:
+                search_end = i
+                break
+        if search_end == len(calc) - 1:
+            calc = calc[:search_start] + str(factorial(Decimal(calcul(calc[(search_start + 5):-(len(calc) - search_end)]))))
+        else:
+            calc = calc[:search_start] + str(factorial(Decimal(calcul(calc[(search_start + 5):-(len(calc) - search_end)])))) + calc[-(len(calc) - search_end - 1):]
+        search_start = calc.find("fact(")
+
+    search_start = calc.find("abs(")
+    while search_start != -1:
+        bracket_count = 1
+        for i in range(search_start + 4, len(calc)):                        
+            if calc[i] == "(":
+                bracket_count = bracket_count + 1
+            elif calc[i] == ")":
+                bracket_count = bracket_count - 1
+            if bracket_count == 0:
+                search_end = i
+                break
+        if search_end == len(calc) - 1:
+            calc = calc[:search_start] + str(fabs(Decimal(calcul(calc[(search_start + 4):-(len(calc) - search_end)]))))
+        else:
+            calc = calc[:search_start] + str(fabs(Decimal(calcul(calc[(search_start + 4):-(len(calc) - search_end)])))) + calc[-(len(calc) - search_end - 1):]
+        search_start = calc.find("abs(")    
 
     # gestion des additions et soustractions
     result_add = 0    
     additions = calc.split("+")
+    i = 0
+    length = len(additions)
+    while i < length:
+	    if additions[i] == "":
+		    additions.remove(additions[i])
+		    length = length -1  
+		    continue
+	    i = i + 1
     for value_add in additions:
 
         # gestion des multiplications et divisions
         result_mult = 1        
         multiplications = value_add.split("X")
+        i = 0
+        length = len(multiplications)
+        while i < length:
+	        if multiplications[i] == "":
+		        multiplications.remove(multiplications[i])
+		        length = length -1  
+		        continue
+	        i = i + 1
         for value_mult in multiplications:
             if value_mult[0] == "m":
                 result_mult = result_mult % Decimal(value_mult[3:])
@@ -238,7 +292,6 @@ def calcul(calc):
         result_add = result_add + result_mult
 
     result = str(result_add)
-
     return result
 
 # gestion du bouton "clear"
@@ -324,6 +377,8 @@ Button(window, text=" X ", font=('Helvetica', 12), fg='black', bg='#e4edf2', com
 Button(window, text=" - ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_operation("-"), height=2, width=7).grid(row=7, column=4)
 Button(window, text=" + ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_operation("+"), height=2, width=7).grid(row=8, column=4)
 
+Button(window, text=" |x| ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_instant_operation("abs"), height=2, width=7).grid(row=4, column=2)
+Button(window, text=" n! ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_instant_operation("fact"), height=2, width=7).grid(row=5, column=3)
 Button(window, text=" log ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_instant_operation("log"), height=2, width=7).grid(row=8, column=0)
 Button(window, text=" ln ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_instant_operation("ln"), height=2, width=7).grid(row=9, column=0)
 
