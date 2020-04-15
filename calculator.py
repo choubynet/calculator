@@ -135,6 +135,14 @@ def input_instant_operation(value):
             result_ongoing = str(factorial(Decimal(result_ongoing)))
         elif value == "abs":
             result_ongoing = str(fabs(Decimal(result_ongoing)))
+        elif value == "sqr":
+            result_ongoing = str(pow(Decimal(result_ongoing), 2))
+        elif value == "cube":
+            result_ongoing = str(pow(Decimal(result_ongoing), 3))
+        elif value == "10^":
+            result_ongoing = str(pow(10, Decimal(result_ongoing)))
+        elif value == "inv":
+            result_ongoing = str(1 / Decimal(result_ongoing))
         result_text.set(result_ongoing)
         last_operation = "instant"
 
@@ -186,6 +194,7 @@ def calcul(calc):
     calc = calc.replace("-", "+-")
     calc = calc.replace("/", "X/")
     calc = calc.replace("mod", "Xmod")
+    calc = calc.replace("10^", "ten")
 
     # transforme toutes les valeurs des "opérations instantannées" (log, fact, etc)
     search_start = calc.find("ln(")
@@ -254,7 +263,75 @@ def calcul(calc):
             calc = calc[:search_start] + str(fabs(Decimal(calcul(calc[(search_start + 4):-(len(calc) - search_end)]))))
         else:
             calc = calc[:search_start] + str(fabs(Decimal(calcul(calc[(search_start + 4):-(len(calc) - search_end)])))) + calc[-(len(calc) - search_end - 1):]
-        search_start = calc.find("abs(")    
+        search_start = calc.find("abs(")
+
+    search_start = calc.find("sqr(")
+    while search_start != -1:
+        bracket_count = 1
+        for i in range(search_start + 4, len(calc)):                        
+            if calc[i] == "(":
+                bracket_count = bracket_count + 1
+            elif calc[i] == ")":
+                bracket_count = bracket_count - 1
+            if bracket_count == 0:
+                search_end = i
+                break
+        if search_end == len(calc) - 1:
+            calc = calc[:search_start] + str(pow(Decimal(calcul(calc[(search_start + 4):-(len(calc) - search_end)])), 2))
+        else:
+            calc = calc[:search_start] + str(pow(Decimal(calcul(calc[(search_start + 4):-(len(calc) - search_end)])), 2)) + calc[-(len(calc) - search_end - 1):]
+        search_start = calc.find("sqr(")
+
+    search_start = calc.find("cube(")
+    while search_start != -1:
+        bracket_count = 1
+        for i in range(search_start + 5, len(calc)):                        
+            if calc[i] == "(":
+                bracket_count = bracket_count + 1
+            elif calc[i] == ")":
+                bracket_count = bracket_count - 1
+            if bracket_count == 0:
+                search_end = i
+                break
+        if search_end == len(calc) - 1:
+            calc = calc[:search_start] + str(pow(Decimal(calcul(calc[(search_start + 5):-(len(calc) - search_end)])), 3))
+        else:
+            calc = calc[:search_start] + str(pow(Decimal(calcul(calc[(search_start + 5):-(len(calc) - search_end)])), 3)) + calc[-(len(calc) - search_end - 1):]
+        search_start = calc.find("cube(")
+
+    search_start = calc.find("ten(")
+    while search_start != -1:
+        bracket_count = 1
+        for i in range(search_start + 4, len(calc)):                        
+            if calc[i] == "(":
+                bracket_count = bracket_count + 1
+            elif calc[i] == ")":
+                bracket_count = bracket_count - 1
+            if bracket_count == 0:
+                search_end = i
+                break
+        if search_end == len(calc) - 1:
+            calc = calc[:search_start] + str(pow(10, Decimal(calcul(calc[(search_start + 4):-(len(calc) - search_end)]))))
+        else:
+            calc = calc[:search_start] + str(pow(10, Decimal(calcul(calc[(search_start + 4):-(len(calc) - search_end)])))) + calc[-(len(calc) - search_end - 1):]
+        search_start = calc.find("ten(")
+
+    search_start = calc.find("inv(")
+    while search_start != -1:
+        bracket_count = 1
+        for i in range(search_start + 4, len(calc)):                        
+            if calc[i] == "(":
+                bracket_count = bracket_count + 1
+            elif calc[i] == ")":
+                bracket_count = bracket_count - 1
+            if bracket_count == 0:
+                search_end = i
+                break
+        if search_end == len(calc) - 1:
+            calc = calc[:search_start] + str(1 / Decimal(calcul(calc[(search_start + 4):-(len(calc) - search_end)])))
+        else:
+            calc = calc[:search_start] + str(1 / Decimal(calcul(calc[(search_start + 4):-(len(calc) - search_end)]))) + calc[-(len(calc) - search_end - 1):]
+        search_start = calc.find("inv(")   
 
     # gestion des additions et soustractions
     result_add = 0    
@@ -347,44 +424,50 @@ def error():
     result_text.set(result_ongoing)
 
 # affichage de l'interface graphique
-window.configure(background="#e9f2ff")
+window.configure(background="#0b0a13")
 window.title("Calculatrice")
 
-Button(window, text="Fermer", command=window.quit).grid(row=0, column=4)
+Label(window, bg="#0b0a13").grid(row=0, columnspan=6)
+Label(window, bg="#0b0a13").grid(row=11, columnspan=6)
+Label(window, bg="#0b0a13").grid(row=3, columnspan=6)
 
 calc_input_text = StringVar()
-Entry(window, textvariable=calc_input_text, font=('Digital dream', 12), justify="right", fg='black', bg="#83e879").grid(row=1, columnspan=5, ipadx=90, ipady=15)
+Entry(window, textvariable=calc_input_text, font=('Digital dream', 12), justify="right", fg='black', bg="#83e879", highlightbackground='black').grid(row=1, columnspan=5, ipadx=90, ipady=15)
 
 result_text = StringVar()
-Entry(window, textvariable=result_text, font=('Digital dream', 14, 'bold'), justify="right", fg='black', bg="#83e879").grid(row=2, columnspan=5, ipadx=70, ipady=15)
+Entry(window, textvariable=result_text, font=('Digital dream', 14, 'bold'), justify="right", fg='black', bg="#83e879", highlightbackground='black').grid(row=2, columnspan=5, ipadx=70, ipady=15)
 result_text.set(result_ongoing)
 
-Button(window, text=" 0 ", font=('Helvetica', 12, 'bold'), fg='black', bg='white', command=lambda: input_number("0"), height=2, width=7).grid(row=9, column=2)
-Button(window, text=" 1 ", font=('Helvetica', 12, 'bold'), fg='black', bg='white', command=lambda: input_number("1"), height=2, width=7).grid(row=8, column=1)
-Button(window, text=" 2 ", font=('Helvetica', 12, 'bold'), fg='black', bg='white', command=lambda: input_number("2"), height=2, width=7).grid(row=8, column=2)
-Button(window, text=" 3 ", font=('Helvetica', 12, 'bold'), fg='black', bg='white', command=lambda: input_number("3"), height=2, width=7).grid(row=8, column=3)
-Button(window, text=" 4 ", font=('Helvetica', 12, 'bold'), fg='black', bg='white', command=lambda: input_number("4"), height=2, width=7).grid(row=7, column=1)
-Button(window, text=" 5 ", font=('Helvetica', 12, 'bold'), fg='black', bg='white', command=lambda: input_number("5"), height=2, width=7).grid(row=7, column=2)
-Button(window, text=" 6 ", font=('Helvetica', 12, 'bold'), fg='black', bg='white', command=lambda: input_number("6"), height=2, width=7).grid(row=7, column=3)
-Button(window, text=" 7 ", font=('Helvetica', 12, 'bold'), fg='black', bg='white', command=lambda: input_number("7"), height=2, width=7).grid(row=6, column=1)
-Button(window, text=" 8 ", font=('Helvetica', 12, 'bold'), fg='black', bg='white', command=lambda: input_number("8"), height=2, width=7).grid(row=6, column=2)
-Button(window, text=" 9 ", font=('Helvetica', 12, 'bold'), fg='black', bg='white', command=lambda: input_number("9"), height=2, width=7).grid(row=6, column=3)
-Button(window, text=" . ", font=('Helvetica', 12, 'bold'), fg='black', bg='white', command=lambda: input_number("."), height=2, width=7).grid(row=9, column=3)
+Button(window, text=" 0 ", font=('Helvetica', 12, 'bold'), fg='black', bg='white', command=lambda: input_number("0"), height=2, width=7, borderwidth=2, relief="raised").grid(row=10, column=2)
+Button(window, text=" 1 ", font=('Helvetica', 12, 'bold'), fg='black', bg='white', command=lambda: input_number("1"), height=2, width=7, borderwidth=2, relief="raised").grid(row=9, column=1)
+Button(window, text=" 2 ", font=('Helvetica', 12, 'bold'), fg='black', bg='white', command=lambda: input_number("2"), height=2, width=7, borderwidth=2, relief="raised").grid(row=9, column=2)
+Button(window, text=" 3 ", font=('Helvetica', 12, 'bold'), fg='black', bg='white', command=lambda: input_number("3"), height=2, width=7, borderwidth=2, relief="raised").grid(row=9, column=3)
+Button(window, text=" 4 ", font=('Helvetica', 12, 'bold'), fg='black', bg='white', command=lambda: input_number("4"), height=2, width=7, borderwidth=2, relief="raised").grid(row=8, column=1)
+Button(window, text=" 5 ", font=('Helvetica', 12, 'bold'), fg='black', bg='white', command=lambda: input_number("5"), height=2, width=7, borderwidth=2, relief="raised").grid(row=8, column=2)
+Button(window, text=" 6 ", font=('Helvetica', 12, 'bold'), fg='black', bg='white', command=lambda: input_number("6"), height=2, width=7, borderwidth=2, relief="raised").grid(row=8, column=3)
+Button(window, text=" 7 ", font=('Helvetica', 12, 'bold'), fg='black', bg='white', command=lambda: input_number("7"), height=2, width=7, borderwidth=2, relief="raised").grid(row=7, column=1)
+Button(window, text=" 8 ", font=('Helvetica', 12, 'bold'), fg='black', bg='white', command=lambda: input_number("8"), height=2, width=7, borderwidth=2, relief="raised").grid(row=7, column=2)
+Button(window, text=" 9 ", font=('Helvetica', 12, 'bold'), fg='black', bg='white', command=lambda: input_number("9"), height=2, width=7, borderwidth=2, relief="raised").grid(row=7, column=3)
+Button(window, text=" . ", font=('Helvetica', 12, 'bold'), fg='black', bg='white', command=lambda: input_number("."), height=2, width=7, borderwidth=2, relief="raised").grid(row=10, column=3)
 
-Button(window, text=" mod ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_operation("mod"), height=2, width=7).grid(row=4, column=4)
-Button(window, text=" / ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_operation("/"), height=2, width=7).grid(row=5, column=4)
-Button(window, text=" X ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_operation("X"), height=2, width=7).grid(row=6, column=4)
-Button(window, text=" - ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_operation("-"), height=2, width=7).grid(row=7, column=4)
-Button(window, text=" + ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_operation("+"), height=2, width=7).grid(row=8, column=4)
+Button(window, text=" mod ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_operation("mod"), height=2, width=7, borderwidth=2, relief="raised").grid(row=5, column=4)
+Button(window, text=" / ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_operation("/"), height=2, width=7, borderwidth=2, relief="raised").grid(row=6, column=4)
+Button(window, text=" X ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_operation("X"), height=2, width=7, borderwidth=2, relief="raised").grid(row=7, column=4)
+Button(window, text=" - ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_operation("-"), height=2, width=7, borderwidth=2, relief="raised").grid(row=8, column=4)
+Button(window, text=" + ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_operation("+"), height=2, width=7, borderwidth=2, relief="raised").grid(row=9, column=4)
 
-Button(window, text=" |x| ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_instant_operation("abs"), height=2, width=7).grid(row=4, column=2)
-Button(window, text=" n! ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_instant_operation("fact"), height=2, width=7).grid(row=5, column=3)
-Button(window, text=" log ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_instant_operation("log"), height=2, width=7).grid(row=8, column=0)
-Button(window, text=" ln ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_instant_operation("ln"), height=2, width=7).grid(row=9, column=0)
+Button(window, text=" x² ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_instant_operation("sqr"), height=2, width=7, borderwidth=2, relief="raised").grid(row=5, column=0)
+Button(window, text=" x³ ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_instant_operation("cube"), height=2, width=7, borderwidth=2, relief="raised").grid(row=6, column=0)
+Button(window, text=" 10ˣ ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_instant_operation("10^"), height=2, width=7, borderwidth=2, relief="raised").grid(row=8, column=0)
+Button(window, text=" 1/x ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_instant_operation("inv"), height=2, width=7, borderwidth=2, relief="raised").grid(row=5, column=1)
+Button(window, text=" |x| ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_instant_operation("abs"), height=2, width=7, borderwidth=2, relief="raised").grid(row=5, column=2)
+Button(window, text=" n! ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_instant_operation("fact"), height=2, width=7, borderwidth=2, relief="raised").grid(row=6, column=3)
+Button(window, text=" log ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_instant_operation("log"), height=2, width=7, borderwidth=2, relief="raised").grid(row=9, column=0)
+Button(window, text=" ln ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_instant_operation("ln"), height=2, width=7, borderwidth=2, relief="raised").grid(row=10, column=0)
 
-Button(window, text=" <= ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_back(), height=2, width=7).grid(row=3, column=4)
-Button(window, text=" C ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_clear(), height=2, width=7).grid(row=3, column=3)
-Button(window, text=" = ", font=('Helvetica', 12), fg='black', bg='#5498f9', command=lambda: input_equal(), height=2, width=7).grid(row=9, column=4)
+Button(window, text=" <= ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_back(), height=2, width=7, borderwidth=2, relief="raised").grid(row=4, column=4)
+Button(window, text=" C ", font=('Helvetica', 12), fg='black', bg='#e4edf2', command=lambda: input_clear(), height=2, width=7, borderwidth=2, relief="raised").grid(row=4, column=3)
+Button(window, text=" = ", font=('Helvetica', 12), fg='black', bg='#5498f9', command=lambda: input_equal(), height=2, width=7, borderwidth=2, relief="raised").grid(row=10, column=4)
 
 # lance le GUI
 window.mainloop()
